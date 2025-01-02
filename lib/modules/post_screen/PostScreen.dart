@@ -60,6 +60,7 @@ class PostScreen extends StatelessWidget {
               ],
             ),
             body: SingleChildScrollView(
+              // update
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Column(
