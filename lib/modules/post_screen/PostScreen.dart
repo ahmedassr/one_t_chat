@@ -12,6 +12,8 @@ import 'package:one_t_chat/shared/style/icon_broken.dart';
 import 'package:one_t_chat/shared/style/text.dart';
 
 class PostScreen extends StatelessWidget {
+  const PostScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     var postTextController = TextEditingController();
@@ -60,7 +62,6 @@ class PostScreen extends StatelessWidget {
               ],
             ),
             body: SingleChildScrollView(
-              // update
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Column(
