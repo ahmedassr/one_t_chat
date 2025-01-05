@@ -30,7 +30,10 @@ class LoginCubit extends Cubit<LoginStates> {
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) async {
-      CashHelper.putValue(key: 'uId', value: value.user?.uid ?? '');
+      await CashHelper.putValue(key: 'uId', value: value.user?.uid ?? '')
+          .then((value) {
+           uId =  CashHelper.getString(key: 'uId') ?? '';
+      });
       await Future.delayed(const Duration(seconds: 1));
       emit(UserLoginSuccess());
     }).catchError((error) {

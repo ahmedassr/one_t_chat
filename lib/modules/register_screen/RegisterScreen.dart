@@ -157,13 +157,6 @@ class RegisterScreen extends StatelessWidget {
               background: Colors.green);
           myNavigator(context, HomeLayout(), backButton: false);
         }
-        if (state is UserCreateSuccess) {
-          myMsg(
-              context: context,
-              content: 'الرجاء الانتظار قليلا الحساب قيد الانشاء',
-              background: Colors.yellow);
-          myNavigator(context, HomeLayout(), backButton: false);
-        }
         if (state is UserCreateError) {
           String error =
               ErrorHandler.getFriendlyErrorMessage(state.error.toString());
