@@ -114,32 +114,35 @@ class RegisterScreen extends StatelessWidget {
                         suffixIconOnPressed:
                             RegisterCubit.get(context).changeVisibility),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 60),
-                      child: defaultButton(
-                          width: double.infinity,
-                          background: secondaryColor,
-                          textColor: primaryColor,
-                          radius: 20,
-                          onPressed: () {
-                            if (formKey.currentState?.validate() ?? false) {
-                              RegisterCubit.get(context).userRegister(
-                                  context: context,
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                  name: nameController.text,
-                                  phone: phoneController.text);
-                            }
-                          },
-                          child: state is! UserRegisterLoading || state is! UserCreateLoading
-                              ? CustomBoldText(
-                                  title: 'Sign In',
-                                  size: 24,
-                                  background: primaryColor)
-                              : const Center(
-                                  child: CircularProgressIndicator(),
-                                )),
-                    ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 60),
+                        child: defaultButton(
+                            width: double.infinity,
+                            background: secondaryColor,
+                            textColor: primaryColor,
+                            radius: 20,
+                            onPressed: () {
+                              if (formKey.currentState?.validate() ?? false) {
+                                RegisterCubit.get(context).userRegister(
+                                    context: context,
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                    name: nameController.text,
+                                    phone: phoneController.text);
+                              }
+                            },
+                            child: state is! UserRegisterLoading
+                                ? CustomBoldText(
+                                    title: 'Sign In',
+                                    size: 24,
+                                    background: primaryColor)
+                                : state is! UserCreateLoading
+                                    ? const Center(
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : const Center(
+                                        child: CircularProgressIndicator(),
+                                      )))
                   ],
                 ),
               ),
@@ -147,11 +150,18 @@ class RegisterScreen extends StatelessWidget {
           ),
         );
       }, listener: (context, state) {
-        if (state is UserCreateSuccess) {
+        if (state is UserRegisterSuccess) {
           myMsg(
               context: context,
               content: 'تم انشاء حسابك بنجاح',
               background: Colors.green);
+          myNavigator(context, HomeLayout(), backButton: false);
+        }
+        if (state is UserCreateSuccess) {
+          myMsg(
+              context: context,
+              content: 'الرجاء الانتظار قليلا الحساب قيد الانشاء',
+              background: Colors.yellow);
           myNavigator(context, HomeLayout(), backButton: false);
         }
         if (state is UserCreateError) {

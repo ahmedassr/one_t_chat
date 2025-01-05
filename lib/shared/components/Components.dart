@@ -67,7 +67,7 @@ Widget passwordFormField(
   return TextFormField(
     controller: controller,
     keyboardType: TextInputType.visiblePassword,
-    obscureText: isVisible,
+    obscureText: !isVisible,
     validator: validator,
     onFieldSubmitted: onSubmit,
     decoration: InputDecoration(
@@ -85,7 +85,7 @@ Widget passwordFormField(
         ),
         suffixIcon: IconButton(
           onPressed: suffixIconOnPressed,
-          icon: Icon(isVisible ? Icons.visibility_off : Icons.visibility),
+          icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
         )),
   );
 }

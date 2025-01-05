@@ -68,9 +68,12 @@ class ChatScreen extends StatelessWidget {
                         : Center(
                             child: CustomBoldText(
                                 title:
-                                    '''you don\'t have any chat yet try to chat with your friends with 
-                                                             OneT Chat''',
-                                size: 24,
+                                    '''
+you don\'t have any chat yet
+try to chat with your friends 
+        with OneT Chat''',
+                                maxLines: 7,
+                                size: 18,
                                 background: secondaryColor),
                           ),
                   )

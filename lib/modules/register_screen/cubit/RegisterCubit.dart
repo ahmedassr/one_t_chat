@@ -21,25 +21,27 @@ class RegisterCubit extends Cubit<RegisterStates> {
   bool isVisible = false;
 
   void changeVisibility() {
-    isVisible != isVisible;
+    isVisible = !isVisible;
+    emit(ChangeSignInPasswordVisibility());
   }
 
-  void userRegister(
-      {required BuildContext context,
-      required String email,
-      required String password,
-      required String name,
-      required String phone}) {
+  void userRegister({
+    required BuildContext context,
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
+  }) {
     emit(UserRegisterLoading());
     FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((value) {
       userCreate(
-              email: email,
-              name: name,
-              phone: phone,
-              uId: value.user?.uid ?? '')
-          .then((value) {
+        email: email,
+        name: name,
+        phone: phone,
+        uid: value.user?.uid ?? '',
+      ).then((value) async {
         emit(UserRegisterSuccess());
       });
     }).catchError((error) {
@@ -48,11 +50,12 @@ class RegisterCubit extends Cubit<RegisterStates> {
     });
   }
 
-  Future<void> userCreate(
-      {required String email,
-      required String name,
-      required String phone,
-      required String uId}) async {
+  Future<void> userCreate({
+    required String email,
+    required String name,
+    required String phone,
+    required String uid,
+  }) async {
     emit(UserCreateLoading());
     UserModel model = UserModel(
       name: name,
@@ -61,19 +64,21 @@ class RegisterCubit extends Cubit<RegisterStates> {
       coverImage: blackImage,
       profileImage: defaultProfileImage,
       email: email,
-      uId: uId,
+      uId: uid,
     );
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uId)
-        .set(model.toMap())
-        .then((value) {
-       CashHelper.putValue(key: 'uId', value: uId ?? '');
+    try {
+     await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set(model.toMap());
+      await CashHelper.putValue(key: 'uId', value: uid).then((value) {
+        uId = CashHelper.getString(key: 'uId') ?? '';
+      });
+
+      await Future.delayed(const Duration(seconds: 2));
       emit(UserCreateSuccess());
-    }).catchError((error) {
+    } catch (error) {
       emit(UserCreateError(error.toString()));
-    });
+    }
   }
-
-
 }

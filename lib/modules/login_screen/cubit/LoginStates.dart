@@ -3,7 +3,7 @@ abstract class LoginStates{}
 
 class LoginInitialState extends LoginStates{}
 
-class PasswordChangeVisibility extends LoginStates{}
+class ChangeLoginPasswordVisibility extends LoginStates{}
 
 class UserLoginLoading extends LoginStates{}
 

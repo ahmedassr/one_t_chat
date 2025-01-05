@@ -27,6 +27,7 @@ class SettingScreen extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              automaticallyImplyLeading: false,
                 titleSpacing: 10,
                 actions: [
                   TextButton(

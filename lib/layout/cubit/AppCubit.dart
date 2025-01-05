@@ -66,7 +66,6 @@ class AppCubit extends Cubit<AppStates> {
 
   Future<void> getUserData() async {
     emit(GetUserDataStateLoading());
-    print('!!!!!!!!!! uid ${uId}');
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uId)

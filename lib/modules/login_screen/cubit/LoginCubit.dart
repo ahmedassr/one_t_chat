@@ -18,7 +18,8 @@ class LoginCubit extends Cubit<LoginStates> {
   bool isVisible = false;
 
   void changeVisibility() {
-    isVisible != isVisible;
+    isVisible = !isVisible;
+    emit(ChangeLoginPasswordVisibility());
   }
 
   void userLogin(
@@ -30,11 +31,10 @@ class LoginCubit extends Cubit<LoginStates> {
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) async {
       CashHelper.putValue(key: 'uId', value: value.user?.uid ?? '');
+      await Future.delayed(const Duration(seconds: 1));
       emit(UserLoginSuccess());
     }).catchError((error) {
       emit(UserLoginError(error.toString()));
     });
   }
-
-
 }

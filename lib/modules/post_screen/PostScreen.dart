@@ -68,7 +68,8 @@ class PostScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        ClipRRect(
+                        (cubit.userModel?.profileImage ?? '').isNotEmpty  && cubit.userModel?.profileImage != null
+                            ? ClipRRect(
                           borderRadius: BorderRadius.circular(30),
                           child: Image(
                             image: NetworkImage(
@@ -77,7 +78,7 @@ class PostScreen extends StatelessWidget {
                             height: 60,
                             fit: BoxFit.fill,
                           ),
-                        ),
+                        ) : const SizedBox(width: 30, height: 30,),
                         const SizedBox(
                           width: 10,
                         ),
