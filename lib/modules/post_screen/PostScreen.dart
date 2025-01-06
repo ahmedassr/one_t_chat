@@ -61,7 +61,7 @@ class PostScreen extends StatelessWidget {
                 )
               ],
             ),
-            body: SingleChildScrollView(
+            body:  SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Column(

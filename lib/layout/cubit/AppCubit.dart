@@ -51,6 +51,9 @@ class AppCubit extends Cubit<AppStates> {
       currentIndex = index;
       emit(BottomNavBarChangedState());
     }
+    if (index == 0) {
+      getPosts();
+    }
     if (index == 1) {
       getUserChats();
     }
@@ -244,7 +247,15 @@ class AppCubit extends Cubit<AppStates> {
 
   Future<void> getPosts() async {
     emit(GetPostLoadingState());
-    await FirebaseFirestore.instance.collection('post').get().then((value) {
+    posts.clear();
+    postsId.clear();
+    likes.clear();
+    comments.clear();
+    await FirebaseFirestore.instance
+        .collection('post')
+        .orderBy('dateTime', descending: true)
+        .get()
+        .then((value) {
       value.docs.forEach((e) async {
         try {
           final likeFuture = e.reference.collection('like').get();
@@ -423,9 +434,10 @@ class AppCubit extends Cubit<AppStates> {
           body: msg.length > 20
               ? '${msg.substring(0, 20)}...'
               : msg.substring(0, 20));
-
+      await Future.delayed(const Duration(seconds: 1));
       emit(SendMassageSuccessState());
     } catch (error) {
+      print(error.toString());
       emit(SendMassageErrorState(error.toString()));
     }
   }

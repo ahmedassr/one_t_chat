@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:one_t_chat/layout/cubit/AppCubit.dart';
 import 'package:one_t_chat/layout/cubit/AppStates.dart';
 import 'package:one_t_chat/models/MassageModel.dart';
@@ -60,10 +61,10 @@ class ChatDetailsScreen extends StatelessWidget {
                             child: model?.senderId == uId
                                 ? senderMassage(
                                     msg: model?.text ?? '',
-                                    time: model?.dateTime ?? '0-0-0')
+                                    time: model?.dateTime ?? '0-0')
                                 : receiverMassage(
                                     msg: model?.text ?? '',
-                                    time: model?.dateTime ?? '0-0-0'),
+                                    time: model?.dateTime ?? '0-0'),
                           );
                         },
                         separatorBuilder: (context, index) {
@@ -117,6 +118,8 @@ class ChatDetailsScreen extends StatelessWidget {
 }
 
 Widget senderMassage({required String msg, required String time}) {
+  DateTime dateTime = DateTime.parse(time);
+  String formatTime = DateFormat('HH:mm').format(dateTime);
   return Align(
     alignment: Alignment.bottomRight,
     child: Column(
@@ -130,17 +133,26 @@ Widget senderMassage({required String msg, required String time}) {
                   bottomLeft: Radius.circular(10))),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child:
+            child: OverflowBar(
+              children: [
                 CustomBoldText(title: msg, size: 18, background: myBlackColor),
+                const SizedBox(
+                  width: 5,
+                ),
+                CustomBoldText(
+                    title: formatTime, size: 12, background: Colors.grey),
+              ],
+            ),
           ),
         ),
-        CustomBoldText(title: time, size: 12, background: Colors.grey)
       ],
     ),
   );
 }
 
 Widget receiverMassage({required String msg, required String time}) {
+  DateTime dateTime = DateTime.parse(time);
+  String formatTime = DateFormat('HH:mm').format(dateTime);
   return Align(
     alignment: Alignment.bottomLeft,
     child: Column(
@@ -154,11 +166,18 @@ Widget receiverMassage({required String msg, required String time}) {
                   bottomRight: Radius.circular(10))),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child:
+            child: OverflowBar(
+              children: [
                 CustomBoldText(title: msg, size: 18, background: myBlackColor),
+                const SizedBox(
+                  width: 5,
+                ),
+                CustomBoldText(
+                    title: formatTime, size: 12, background: Colors.white),
+              ],
+            ),
           ),
         ),
-        CustomBoldText(title: time, size: 12, background: Colors.grey)
       ],
     ),
   );

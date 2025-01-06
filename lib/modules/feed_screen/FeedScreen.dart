@@ -18,10 +18,10 @@ class FeedScreen extends StatelessWidget {
 
     return BlocConsumer<AppCubit, AppStates>(
         builder: (context, state) {
-          return state != GetUserDataStateLoading && cubit.userModel != null
-              ? Scaffold(
-                  body: SingleChildScrollView(
-                    child: Padding(
+          return Scaffold(
+            body: SingleChildScrollView(
+              child: state is! GetPostLoadingState && cubit.posts.isNotEmpty
+                  ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: Column(
                         children: [
@@ -48,13 +48,10 @@ class FeedScreen extends StatelessWidget {
                               },
                               itemCount: cubit.posts.length)
                         ],
-                      ),
-                    ),
-                  ),
-                )
-              : const Center(
-                  child: CircularProgressIndicator(),
-                );
+                      ))
+                  : const Center(child: CircularProgressIndicator()),
+            ),
+          );
         },
         listener: (context, state) {});
   }
