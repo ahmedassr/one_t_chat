@@ -11,10 +11,12 @@ import 'package:one_t_chat/shared/style/color.dart';
 import 'package:one_t_chat/shared/style/icon_broken.dart';
 import 'package:one_t_chat/shared/style/text.dart';
 
-class SettingScreen extends StatelessWidget {
+class ProfileScreen extends StatelessWidget {
   var nameController = TextEditingController();
   var phoneController = TextEditingController();
   var bioController = TextEditingController();
+
+  ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

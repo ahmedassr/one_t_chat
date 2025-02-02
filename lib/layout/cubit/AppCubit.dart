@@ -18,7 +18,7 @@ import 'package:one_t_chat/models/PostModel.dart';
 import 'package:one_t_chat/modules/chat_screen/ChatScreen.dart';
 import 'package:one_t_chat/modules/feed_screen/FeedScreen.dart';
 import 'package:one_t_chat/modules/post_screen/PostScreen.dart';
-import 'package:one_t_chat/modules/setting_screen/SettingScreen.dart';
+import 'package:one_t_chat/modules/setting_screen/ProfileScreen.dart';
 import 'package:one_t_chat/modules/users_screen/AllUsersScreen.dart';
 import 'package:one_t_chat/network/remote/DioHelper.dart';
 import 'package:one_t_chat/shared/components/Components.dart';
@@ -38,7 +38,7 @@ class AppCubit extends Cubit<AppStates> {
     ChatScreen(),
     PostScreen(),
     UsersScreen(),
-    SettingScreen()
+    ProfileScreen()
   ];
 
   List<String> title = ['Feeds', 'Chats', 'Add Post', 'Users', 'Settings'];
