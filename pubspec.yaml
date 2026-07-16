@@ -38,7 +38,7 @@ dependencies:
   shared_preferences: ^2.3.3
   flutter_bloc: ^8.1.6
   bloc: ^8.1.4
-  fluttertoast: ^8.2.12
+  fluttertoast: ^8.2.8
   carousel_slider: ^5.0.0
   flutter_launcher_icons: ^0.14.1
   #firebase
@@ -86,7 +86,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/chat-7539a-firebase-adminsdk-glq3m-2aab135cd1.json
+    - assets/chat-7539a-firebase-adminsdk-glq3m-34c337f106.json
 
   fonts:
    - family: IconBroken
