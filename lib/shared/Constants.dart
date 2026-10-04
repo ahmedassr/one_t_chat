@@ -1,4 +1,5 @@
 bool? isNewUser = true;
 String uId = '';
 String accessToken = '';
-String imgbbApiKey = '3cfa42abfde0ef88f4a4d49a45dc8764';
+// Passed at build time: flutter run --dart-define=IMGBB_API_KEY=your_key
+const String imgbbApiKey = String.fromEnvironment('IMGBB_API_KEY');

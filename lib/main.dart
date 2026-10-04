@@ -24,7 +24,7 @@ void main() async {
   await CashHelper.init();
   Bloc.observer = MyBlocObserver();
   DioHelper.init();
-  accessToken = await CustomFirebaseMessage().getAccessToken();
+  accessToken = await CustomFirebaseMessage().getMyAccessToken() ?? '';
   CustomFirebaseMessage().saveUserToken();
   Widget firstWidget = theFirstWidget();
 
