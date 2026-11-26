@@ -66,15 +66,10 @@ class ChatScreen extends StatelessWidget {
                             },
                             itemCount: cubit.userChats.length)
                         : Center(
-                            child: CustomBoldText(
-                                title:
-                                    '''
+                            child: CustomBoldText(title: '''
 you don\'t have any chat yet
 try to chat with your friends 
-        with OneT Chat''',
-                                maxLines: 7,
-                                size: 18,
-                                background: secondaryColor),
+        with OneT Chat''', maxLines: 7, size: 18, background: secondaryColor),
                           ),
                   )
                 : const Center(

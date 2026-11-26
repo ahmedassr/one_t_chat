@@ -1,30 +1,49 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:one_t_chat/main.dart';
+import 'package:one_t_chat/models/MassageModel.dart';
+import 'package:one_t_chat/models/PostModel.dart';
+import 'package:one_t_chat/models/UserModel.dart';
+import 'package:one_t_chat/shared/ErrorHandler.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp(startWidget: Center(),));
+  test('PostModel reads dateTime correctly', () {
+    final model = PostModel.fromJson({
+      'name': 'Ahmed',
+      'dateTime': '2026-11-26T10:00:00.000',
+      'postText': 'Hello',
+      'postImage': '',
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(model.name, 'Ahmed');
+    expect(model.dateTime, '2026-11-26T10:00:00.000');
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('UserModel defaults missing fields safely', () {
+    final model = UserModel.fromJson(null);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(model.name, '');
+    expect(model.email, '');
+    expect(model.profileImage, '');
+  });
+
+  test('MassageModel serializes and deserializes', () {
+    final model = MassageModel(
+      text: 'Hi',
+      dateTime: '2026-11-26T10:00:00.000',
+      senderId: 'user-1',
+    );
+
+    expect(MassageModel.fromJson(model.toMap()).text, 'Hi');
+  });
+
+  test('Friendly auth errors are mapped', () {
+    expect(
+      ErrorHandler.getFriendlyErrorMessage('invalid-email'),
+      'البريد الاكتروني غير صحيح',
+    );
+    expect(
+      ErrorHandler.getFriendlyErrorMessage('network-request-failed'),
+      isNotEmpty,
+    );
   });
 }

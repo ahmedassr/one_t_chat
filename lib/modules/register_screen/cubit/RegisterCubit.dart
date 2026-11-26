@@ -67,7 +67,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
       uId: uid,
     );
     try {
-     await FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
           .set(model.toMap());

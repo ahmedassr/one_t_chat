@@ -45,14 +45,16 @@ class CustomChatCard extends StatelessWidget {
                     ),
                     IconButton(
                         onPressed: () {
-                          AppCubit.get(context).getMassages(receiverId: model.uId ?? '');
+                          AppCubit.get(context)
+                              .getMassages(receiverId: model.uId ?? '');
                           myNavigator(
                               context,
                               ChatDetailsScreen(
-                                  name: model.name ?? '',
-                                  image: model.profileImage ?? '',
-                                  receiverUid: model.uId ?? '',
-                              receiverToken: model.token ?? '',),
+                                name: model.name ?? '',
+                                image: model.profileImage ?? '',
+                                receiverUid: model.uId ?? '',
+                                receiverToken: model.token ?? '',
+                              ),
                               backButton: true);
                         },
                         icon: Icon(

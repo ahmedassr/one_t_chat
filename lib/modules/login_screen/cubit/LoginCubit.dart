@@ -32,7 +32,7 @@ class LoginCubit extends Cubit<LoginStates> {
         .then((value) async {
       await CashHelper.putValue(key: 'uId', value: value.user?.uid ?? '')
           .then((value) {
-           uId =  CashHelper.getString(key: 'uId') ?? '';
+        uId = CashHelper.getString(key: 'uId') ?? '';
       });
       await Future.delayed(const Duration(seconds: 1));
       emit(UserLoginSuccess());

@@ -29,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
-              automaticallyImplyLeading: false,
+                automaticallyImplyLeading: false,
                 titleSpacing: 10,
                 actions: [
                   TextButton(

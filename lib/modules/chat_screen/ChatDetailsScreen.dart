@@ -87,7 +87,7 @@ class ChatDetailsScreen extends StatelessWidget {
                       ),
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: msgController != ''
+                          child: msgController.text.isNotEmpty
                               ? IconButton(
                                   onPressed: () {
                                     if (msgController.text != '') {
@@ -118,8 +118,9 @@ class ChatDetailsScreen extends StatelessWidget {
 }
 
 Widget senderMassage({required String msg, required String time}) {
-  DateTime dateTime = DateTime.parse(time);
-  String formatTime = DateFormat('HH:mm').format(dateTime);
+  final dateTime = DateTime.tryParse(time);
+  final formatTime =
+      dateTime == null ? '' : DateFormat('HH:mm').format(dateTime);
   return Align(
     alignment: Alignment.bottomRight,
     child: Column(
@@ -151,8 +152,9 @@ Widget senderMassage({required String msg, required String time}) {
 }
 
 Widget receiverMassage({required String msg, required String time}) {
-  DateTime dateTime = DateTime.parse(time);
-  String formatTime = DateFormat('HH:mm').format(dateTime);
+  final dateTime = DateTime.tryParse(time);
+  final formatTime =
+      dateTime == null ? '' : DateFormat('HH:mm').format(dateTime);
   return Align(
     alignment: Alignment.bottomLeft,
     child: Column(

@@ -138,11 +138,9 @@ class LoginScreen extends StatelessWidget {
           myNavigator(context, HomeLayout());
         }
         if (state is UserLoginError) {
-          String error = ErrorHandler.getFriendlyErrorMessage(state.error.toString());
-          myMsg(
-              context: context,
-              content: error,
-              background: Colors.red);
+          String error =
+              ErrorHandler.getFriendlyErrorMessage(state.error.toString());
+          myMsg(context: context, content: error, background: Colors.red);
           print('######## ERE${state.error.toString()}');
         }
       }),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,6 +23,7 @@ import 'package:one_t_chat/modules/setting_screen/ProfileScreen.dart';
 import 'package:one_t_chat/modules/users_screen/AllUsersScreen.dart';
 import 'package:one_t_chat/network/remote/DioHelper.dart';
 import 'package:one_t_chat/shared/components/Components.dart';
+import 'package:one_t_chat/shared/firebase/CustomFirebaseMessage.dart';
 
 import '../../models/MassageModel.dart';
 import '../../models/UserModel.dart';
@@ -29,6 +31,12 @@ import '../../shared/Constants.dart';
 
 class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitialState());
+
+  @override
+  Future<void> close() async {
+    await massagesSubscription?.cancel();
+    await super.close();
+  }
 
   static AppCubit get(context) => BlocProvider.of(context);
 
@@ -68,12 +76,17 @@ class AppCubit extends Cubit<AppStates> {
   UserModel? userModel;
 
   Future<void> getUserData() async {
+    if (uId.isEmpty) return;
     emit(GetUserDataStateLoading());
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uId)
         .get()
         .then((value) {
+      if (!value.exists) {
+        emit(GetUserDataStateError('User profile was not found.'));
+        return;
+      }
       userModel = UserModel.fromJson(value.data());
       if (userModel != null) {
         emit(GetUserDataStateSuccess());
@@ -90,8 +103,14 @@ class AppCubit extends Cubit<AppStates> {
       required String bio,
       required String phone}) async {
     emit(UpdateUserDataStateLoading());
-    uploadProfileImage();
-    uploadCoverImage();
+    if (this.profileImage != null) {
+      await uploadProfileImage();
+      profileImage = profileImageUrl ?? profileImage;
+    }
+    if (this.coverImage != null) {
+      await uploadCoverImage();
+      coverImage = coverImageUrl ?? coverImage;
+    }
     UserModel updateModel = UserModel(
         name: name,
         phone: phone,
@@ -198,9 +217,13 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   Future<void> uploadPostImage() async {
+    if (postImage == null) {
+      postImageUrl = null;
+      return;
+    }
     emit(UploadImagePostLoadingState());
-    final bytes = await postImage?.readAsBytes();
-    final base64Image = base64Encode(bytes!);
+    final bytes = await postImage!.readAsBytes();
+    final base64Image = base64Encode(bytes);
     await ImgbbUploader(imgbbApiKey)
         .uploadImageBase64(base64Image: base64Image)
         .then((value) {
@@ -251,56 +274,62 @@ class AppCubit extends Cubit<AppStates> {
     postsId.clear();
     likes.clear();
     comments.clear();
-    await FirebaseFirestore.instance
-        .collection('post')
-        .orderBy('dateTime', descending: true)
-        .get()
-        .then((value) {
-      value.docs.forEach((e) async {
-        try {
-          final likeFuture = e.reference.collection('like').get();
-          final commentFuture = e.reference.collection('comment').get();
-          final result = await Future.wait([likeFuture, commentFuture]);
-          final likeSnapshot = result[0];
-          final commentSnapshot = result[1];
-          postsId.add(e.id);
-          posts.add(PostModel.fromJson(e.data()));
-          likes.add(likeSnapshot.docs.length);
-          comments.add(commentSnapshot.docs.length);
-          emit(GetPostSuccessState());
-        } catch (error) {
-          emit(GetPostErrorState(error.toString()));
-        }
-      });
-    }).catchError((error) {
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection('post')
+          .orderBy('dateTime', descending: true)
+          .get();
+      for (final post in value.docs) {
+        final likeSnapshot = await post.reference.collection('like').get();
+        final commentSnapshot =
+            await post.reference.collection('comment').get();
+        postsId.add(post.id);
+        posts.add(PostModel.fromJson(post.data()));
+        likes.add(likeSnapshot.docs.length);
+        comments.add(commentSnapshot.docs.length);
+      }
+      emit(GetPostSuccessState());
+    } catch (error) {
       emit(GetPostErrorState(error.toString()));
-    });
+    }
   }
 
   Future<void> postLike(String postId) async {
-    await FirebaseFirestore.instance
-        .collection('post')
-        .doc(postId)
-        .collection('like')
-        .doc(userModel?.uId)
-        .set({'like': true}).then((value) {
+    try {
+      final likeRef = FirebaseFirestore.instance
+          .collection('post')
+          .doc(postId)
+          .collection('like')
+          .doc(uId);
+      final snapshot = await likeRef.get();
+      if (snapshot.exists) {
+        await likeRef.delete();
+      } else {
+        await likeRef.set({'like': true});
+      }
       emit(LikePostSuccessState());
-    }).catchError((error) {
+    } catch (error) {
       emit(LikePostErrorState(error.toString()));
-    });
+    }
   }
 
   Future<void> postComment(String postId, String comment) async {
-    FirebaseFirestore.instance
-        .collection('post')
-        .doc(postId)
-        .collection('comment')
-        .doc(userModel?.uId)
-        .set({'text': comment}).then((value) {
+    final trimmed = comment.trim();
+    if (trimmed.isEmpty) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('post')
+          .doc(postId)
+          .collection('comment')
+          .add({
+        'text': trimmed,
+        'uId': uId,
+        'dateTime': DateTime.now().toIso8601String()
+      });
       emit(CommentPostSuccessState());
-    }).catchError((error) {
+    } catch (error) {
       emit(CommentPostErrorState(error.toString()));
-    });
+    }
   }
 
   List<UserModel>? usersLikePost;
@@ -338,30 +367,27 @@ class AppCubit extends Cubit<AppStates> {
     emit(GetPostCommentsLoadingState());
     usersCommentsPost = [];
     commentBody = [];
-    await FirebaseFirestore.instance
-        .collection('post')
-        .doc(postId)
-        .collection('comment')
-        .get()
-        .then((value) {
-      value.docs.forEach((e) async {
-        commentBody?.add(e.get('text'));
-        await FirebaseFirestore.instance
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection('post')
+          .doc(postId)
+          .collection('comment')
+          .get();
+      for (final comment in value.docs) {
+        final commentUserId = comment.data()['uId']?.toString() ?? comment.id;
+        final user = await FirebaseFirestore.instance
             .collection('users')
-            .doc(e.id)
-            .get()
-            .then((value) {
-          print('${value.data()}');
-          usersCommentsPost?.add(UserModel.fromJson(value.data()));
-          print('${value.data()}');
-          emit(GetPostCommentsSuccessState());
-        }).catchError((error) {
-          emit(GetPostCommentsErrorState(error.toString()));
-        });
-      });
-    }).catchError((error) {
-      emit(GetPostLikesErrorState(error));
-    });
+            .doc(commentUserId)
+            .get();
+        commentBody?.add(comment.data()['text']?.toString() ?? '');
+        if (user.data() != null) {
+          usersCommentsPost?.add(UserModel.fromJson(user.data()));
+        }
+      }
+      emit(GetPostCommentsSuccessState());
+    } catch (error) {
+      emit(GetPostCommentsErrorState(error.toString()));
+    }
   }
 
   List<UserModel> users = [];
@@ -386,10 +412,10 @@ class AppCubit extends Cubit<AppStates> {
       {required String receiverUid,
       required String receiverToken,
       required String msg}) async {
+    final text = msg.trim();
+    if (text.isEmpty || uId.isEmpty) return;
     MassageModel model = MassageModel(
-        text: msg, dateTime: DateTime.now().toString(), senderId: uId);
-    var token =
-        await FirebaseMessaging.instance.getToken(vapidKey: receiverUid);
+        text: text, dateTime: DateTime.now().toIso8601String(), senderId: uId);
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -427,14 +453,16 @@ class AppCubit extends Cubit<AppStates> {
         });
       });
 
-      postNotification(
-          accessToken: accessToken,
-          receiverToken: receiverToken,
-          title: 'you have a message from ${userModel?.name}',
-          body: msg.length > 20
-              ? '${msg.substring(0, 20)}...'
-              : msg.substring(0, 20));
-      await Future.delayed(const Duration(seconds: 1));
+      if (accessToken.isEmpty) {
+        accessToken = await CustomFirebaseMessage().getMyAccessToken() ?? '';
+      }
+      if (accessToken.isNotEmpty && receiverToken.isNotEmpty) {
+        await postNotification(
+            accessToken: accessToken,
+            receiverToken: receiverToken,
+            title: 'New message from ${userModel?.name ?? 'OneT Chat'}',
+            body: text.length > 20 ? '${text.substring(0, 20)}...' : text);
+      }
       emit(SendMassageSuccessState());
     } catch (error) {
       print(error.toString());
@@ -473,9 +501,12 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   List<MassageModel>? massages;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? massagesSubscription;
 
   Future<void> getMassages({required String receiverId}) async {
-    await FirebaseFirestore.instance
+    await massagesSubscription?.cancel();
+    massages = [];
+    massagesSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(uId)
         .collection('chat')
@@ -485,20 +516,11 @@ class AppCubit extends Cubit<AppStates> {
         .snapshots()
         .listen((event) {
       massages = [];
-
       event.docs.forEach((e) {
         massages?.add(MassageModel.fromJson(e.data()));
-        print('${e.data()}');
       });
       emit(GetMassageSuccessState());
     });
-
-    //     .get()
-    //     .then((value) {
-    //   value.docs.forEach((e) {
-    //     massages.add(MassageModel.fromJson(e.data()));
-    //   });
-    // }).catchError((error) {});
   }
 
   Future<void> postNotification(

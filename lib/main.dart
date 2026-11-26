@@ -24,18 +24,12 @@ void main() async {
   await CashHelper.init();
   Bloc.observer = MyBlocObserver();
   DioHelper.init();
-  accessToken = await CustomFirebaseMessage().getMyAccessToken() ?? '';
-  CustomFirebaseMessage().saveUserToken();
+  if (uId.isNotEmpty) {
+    CustomFirebaseMessage().saveUserToken();
+  }
   Widget firstWidget = theFirstWidget();
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
-    }
-  });
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {});
 
   runApp(MyApp(
     startWidget: firstWidget,
@@ -57,10 +51,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'OneT',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-          useMaterial3: true,
-        ),
+        theme: buildAppTheme(),
         home: startWidget,
       ),
     );

@@ -25,13 +25,13 @@ class CustomFirebaseMessage {
   }
 
   Future<void> saveUserToken() async {
-    var token = await FirebaseMessaging.instance.getToken();
-    FirebaseFirestore.instance
+    if (uId.isEmpty) return;
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(uId)
-        .set({'token': token}, SetOptions(merge: true))
-        .then((value) {})
-        .catchError((error) {});
+        .set({'token': token}, SetOptions(merge: true));
   }
 
   Future<String?> getMyAccessToken() async {
